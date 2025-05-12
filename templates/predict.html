@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predictive Magic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .intro-text {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .decorative-line {
+            width: 50px;
+            height: 4px;
+            background: #3498db;
+            margin: 0 auto 20px;
+            border-radius: 2px;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select, input[type="submit"], input[type="number"] {
+            padding: 12px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 1em;
+            width: 200px;
+        }
+        input[type="submit"] {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        input[type="submit"]:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        li {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1em;
+        }
+        .sub-text {
+            color: #95a5a6;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .nav-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            background: #2ecc71;
+            color: #fff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.3s;
+        }
+        button:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #3498db;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+    </style>
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('predict-form').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Predict the Future</h1>
+        <div class="intro-text">
+            Forecast numeric values like Sales or Price based on your data’s numeric patterns!
+        </div>
+        <div class="decorative-line"></div>
+        <form id="predict-form" method="post" onsubmit="showLoading()">
+            <div class="tooltip">
+                <select name="column" required>
+                    <option value="">Select Numeric Target</option>
+                    {% for col in columns %}
+                        <option value="{{ col }}">{{ col }}</option>
+                    {% endfor %}
+                </select>
+                <span class="tooltiptext">Pick a numeric column to predict, e.g., Sales or Price.</span>
+            </div>
+            <label><input type="checkbox" name="retrain" value="true"> Retrain Model</label>
+            <input type="submit" value="Predict">
+        </form>
+        <div id="loading" class="loading">Running predictions... Please wait.</div>
+        {% if error %}
+            <p class="error"><strong>Oops:</strong> {{ error }}. Try a different numeric column or check your data.</p>
+        {% endif %}
+        {% if predictions %}
+            <h2>{{ target_col }} Predictions:</h2>
+            <ul>
+                {% for pred in predictions.predictions %}
+                    <li>
+                        {{ pred.value|round(2) }}
+                        (Confidence Interval: {{ pred.lower|round(2) }} - {{ pred.upper|round(2) }})
+                    </li>
+                {% endfor %}
+            </ul>
+            <p><strong>RMSE:</strong> {{ predictions.rmse|round(2) }} (Lower is better)</p>
+            {% if predictions.feature_importance %}
+                <h2>Key Features Influencing Predictions:</h2>
+                <ul>
+                    {% for feature, importance in predictions.feature_importance.items() %}
+                        <li>{{ feature }}: {{ importance|round(3) }}</li>
+                    {% endfor %}
+                </ul>
+                <div class="sub-text">These numeric features most strongly influence the predictions for {{ target_col }}.</div>
+            {% endif %}
+            <div class="sub-text">
+                These predictions forecast {{ target_col }} based on your data’s numeric patterns. Test new scenarios below!
+            </div>
+            <h2>Try New Data</h2>
+            <form method="post">
+                <input type="hidden" name="target_col" value="{{ target_col }}">
+                {% for col in feature_cols %}
+                    <div class="tooltip">
+                        <input type="number" step="any" name="{{ col }}" placeholder="{{ col }}" required>
+                        <span class="tooltiptext">Enter a numeric value for {{ col }} (e.g., {{ data[col].mean()|round(2) }}).</span>
+                    </div><br>
+                {% endfor %}
+                <input type="submit" name="new_data" value="Predict New">
+            </form>
+            {% if new_prediction %}
+                <h2>New Prediction for {{ target_col }}:</h2>
+                <p>
+                    {{ new_prediction.value|round(2) }}
+                    (Confidence Interval: {{ new_prediction.lower|round(2) }} - {{ new_prediction.upper|round(2) }})
+                </p>
+            {% endif %}
+        {% endif %}
+        <div class="nav-buttons">
+            <a href="/dashboard"><button>Back to Dashboard</button></a>
+        </div>
+    </div>
+</body>
+</html>

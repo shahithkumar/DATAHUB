@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container fade-in">
+        <div class="rec-box box">
+            <h1>AI Insights</h1>
+            <div class="intro-text">
+                Let our AI whisper some wisdom! Here’s a smart tip to make your data work harder and shine brighter.
+            </div>
+            <div class="decorative-line"></div>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            {% if advice %}
+                <p>{{ advice }}</p>
+                <div class="sub-text">
+                    Take this nugget and run with it—your data’s got potential!
+                </div>
+            {% endif %}
+            <a href="/"><button>Home</button></a>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

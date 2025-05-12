@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About This Magic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container fade-in">
+        <div class="about-box box">
+            <h1>About This Tool</h1>
+            <div class="intro-text">
+                Welcome to your data playground—a whimsical space where CSV files turn into visual delights and smart insights.
+            </div>
+            <div class="decorative-line"></div>
+            <h2>What We Do</h2>
+            <p>
+                Upload a CSV, clean it up, visualize it with 15 stunning charts, predict trends, explore what-ifs, and get clever AI tips. 
+                Built with love and a dash of whimsy, this tool is here to make data fun and fearless.
+            </p>
+            <h2>Why It’s Special</h2>
+            <div class="sub-text">
+                We blend bold design with powerful tech—think of it as a creative studio for your numbers. 
+                Whether you’re analyzing sales, stats, or secrets, we’ve got you covered with style and substance.
+            </div>
+            <a href="/"><button>Home</button></a>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

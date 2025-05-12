@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Your Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+        }
+        .upload-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .intro-text {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .decorative-line {
+            width: 50px;
+            height: 4px;
+            background: #3498db;
+            margin: 0 auto 20px;
+            border-radius: 2px;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+            font-size: 1em;
+        }
+        input[type="submit"] {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+        }
+        input[type="submit"]:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        button {
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s, background 0.3s;
+        }
+        button:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+        .error, .success {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .error {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .success {
+            background: #2ecc71;
+            color: #fff;
+        }
+        .sub-text {
+            font-size: 0.9em;
+            color: #95a5a6;
+            margin-top: 20px;
+        }
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-box">
+            <h1>Drop Your Data</h1>
+            <div class="intro-text">
+                Let’s dive into your data! Upload a CSV or Excel file, and we’ll clean it, analyze it, and unlock its secrets.
+            </div>
+            <div class="decorative-line"></div>
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".csv,.xlsx" required>
+                <input type="submit" value="Upload" id="submitBtn">
+            </form>
+            <div class="spinner" id="spinner"></div>
+            {% if abnormalities %}
+                <p class="success"><strong>We Fixed:</strong> {{ abnormalities|join(', ') }}</p>
+            {% endif %}
+            {% if error %}
+                <p class="error"><strong>Oops:</strong> {{ error }}</p>
+            {% endif %}
+            <div class="sub-text">
+                Tip: Files with numeric columns work best. Max size: 16MB.
+            </div>
+            <a href="/dynamics"><button>Analyze Now</button></a>
+        </div>
+    </div>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('spinner').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Dynamics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="box fade-in">
+            <h1>Data Dynamics</h1>
+            <div class="intro-text">
+                Shape your data! Edit names, types, drop columns/rows, and download the result. Explore stats and relationships too!
+            </div>
+            <div class="decorative-line"></div>
+
+            <!-- Data Editing -->
+            <div class="edit-data">
+                <h2>Edit Your Data</h2>
+                <form method="post" action="{{ url_for('edit_data') }}">
+                    <!-- Edit Column Names and Types -->
+                    <h3>Columns</h3>
+                    <table>
+                        <tr>
+                            <th>Current Name</th>
+                            <th>New Name</th>
+                            <th>Type</th>
+                            <th>Drop</th>
+                        </tr>
+                        {% for col in col_info %}
+                            <tr>
+                                <td>{{ col.name }}</td>
+                                <td><input type="text" name="new_name_{{ col.name }}" placeholder="{{ col.name }}"></td>
+                                <td>
+                                    <select name="type_{{ col.name }}">
+                                        <option value="Numeric" {% if col.type == 'Numeric' %}selected{% endif %}>Numeric</option>
+                                        <option value="String" {% if col.type == 'String' %}selected{% endif %}>String</option>
+                                        <option value="Date" {% if col.type == 'Date' %}selected{% endif %}>Date</option>
+                                    </select>
+                                </td>
+                                <td><input type="checkbox" name="drop_col_{{ col.name }}"></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    <!-- Drop Rows by Condition -->
+                    <h3>Drop Rows by Condition</h3>
+                    <p class="sub-text">Enter conditions like 'Sales > 1000' or 'Region == "North"'. Use multiple conditions separated by commas.</p>
+                    <input type="text" name="conditions" placeholder="e.g., Sales > 1000, Region == 'North'">
+                    
+                    <!-- Download Format -->
+                    <h3>Download Modified Data</h3>
+                    <select name="download_format">
+                        <option value="csv">CSV</option>
+                        <option value="xlsx">Excel</option>
+                    </select>
+                    <input type="submit" value="Apply Changes & Download">
+                </form>
+                {% if edit_error %}
+                    <p class="error">{{ edit_error }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Basic Stats -->
+            <div class="stats">
+                <h2>Dataset Overview</h2>
+                <p><strong>Rows:</strong> {{ stats.rows }}</p>
+                <p><strong>Columns:</strong> {{ stats.columns }}</p>
+                <p><strong>Null Values:</strong> {{ stats.nulls }}</p>
+                <p><strong>Unique Values per Column:</strong></p>
+                <ul>
+                    {% for col, count in stats.uniques.items() %}
+                        <li>{{ col }}: {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Column Info -->
+            <div class="col-info">
+                <h2>Column Breakdown</h2>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Usage</th>
+                        <th>Nulls</th>
+                        <th>Uniques</th>
+                        <th>Sample</th>
+                    </tr>
+                    {% for col in col_info %}
+                        <tr>
+                            <td>{{ col.name }}</td>
+                            <td>{{ col.type }}</td>
+                            <td>{{ col.usage }}</td>
+                            <td>{{ col.nulls }}</td>
+                            <td>{{ col.uniques }}</td>
+                            <td>{{ col.sample }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview">
+                <h2>Data Preview</h2>
+                <table>
+                    <tr>
+                        {% for col in preview.0.keys() %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for row in preview %}
+                        <tr>
+                            {% for value in row.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- Target Selection and Analysis -->
+            <div class="target">
+                <h2>Choose Your Focus</h2>
+                {% if suggested_target %}
+                    <p><strong>Suggested Target:</strong> {{ suggested_target }} (high variance, good for predictions)</p>
+                {% else %}
+                    <p><strong>No numeric columns available for targeting.</strong></p>
+                {% endif %}
+                <form method="post" action="{{ url_for('dynamics') }}">
+                    <select name="target_col" required>
+                        <option value="">Select Target Column</option>
+                        {% for col in columns %}
+                            <option value="{{ col }}" {% if col == target_col %}selected{% endif %}>{{ col }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="chart_type">
+                        <option value="">Select Chart Type (Optional)</option>
+                        <option value="hist">Histogram - Distribution</option>
+                        <option value="box">Box Plot - Spread & Outliers</option>
+                    </select>
+                    <input type="submit" value="Analyze">
+                </form>
+                {% if target_stats %}
+                    <p><strong>Target Stats ({{ target_col }}):</strong></p>
+                    <p>Mean: {{ target_stats.mean|round(2) }}</p>
+                    <p>Std: {{ target_stats.std|round(2) }}</p>
+                    <p>Min: {{ target_stats.min|round(2) }}</p>
+                    <p>Max: {{ target_stats.max|round(2) }}</p>
+                {% endif %}
+                {% if chart %}
+                    <div class="chart-card">
+                        <h3>{{ chart.type.capitalize() }} of {{ target_col }}</h3>
+                        {% if chart.img %}
+                            <img src="data:image/png;base64,{{ chart.img }}" alt="{{ chart.type }}">
+                        {% else %}
+                            <p class="error">{{ chart.message }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if heatmap %}
+                    <div class="chart-card">
+                        <h3>Correlation Heatmap</h3>
+                        {% if heatmap.img %}
+                            <img src="data:image/png;base64,{{ heatmap.img }}" alt="Correlation Heatmap">
+                            <p class="sub-text">This heatmap shows how numeric columns relate to each other. Stronger colors indicate stronger relationships.</p>
+                        {% else %}
+                            <p class="error">{{ heatmap.message }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Navigation -->
+            <div class="nav-buttons">
+                <a href="/dashboard"><button>Dashboard</button></a>
+                <a href="/predict"><button>Predict</button></a>
+                <a href="/whatif"><button>What-If</button></a>
+                <a href="/recommendations"><button>Insights</button></a>
+                <a href="/upload"><button>Upload New Data</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

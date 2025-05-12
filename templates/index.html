@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Playground</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container hero fade-in">
+        <h1>Data Playground</h1>
+        <p>Unlock insights with a sprinkle of magic. Upload your CSV and let’s make sense of it—beautifully.</p>
+        <div class="decorative-line"></div>
+        <div class="intro-text">
+            Dive into a world where numbers dance and insights sparkle. Whether you're a data wizard or just curious, 
+            we’ve got the tools to turn your CSV into a masterpiece of discovery.
+        </div>
+        <a href="/upload"><button class="bounce">Get Started</button></a>
+        <div class="sub-text">
+            Explore 15 stunning visualizations, predict the future, and play with what-ifs—all in one playful space.
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
